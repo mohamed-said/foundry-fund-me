@@ -12,9 +12,14 @@ import {HelperConfig} from "../script/HelperConfig.s.sol";
 contract DeployFundMe is Script {
 
     function run() external returns (FundMe) {
+        // anything before 'startBroadcast'
+        // is not going to send a real transaction
+        // instead, it's going to run in a simulated environment
         HelperConfig helperConfig = new HelperConfig();
         address ethUsdPriceConfigAddress = helperConfig.activeNetworkConfig();
 
+        // After 'startBroadcast' ,, this starts the real transaction
+        // it costs gas
         vm.startBroadcast();
         FundMe fundMe = new FundMe(ethUsdPriceConfigAddress);
         vm.stopBroadcast();

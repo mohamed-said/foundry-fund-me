@@ -12,8 +12,10 @@ error FundMe__NotOwner();
 contract FundMe {
     using PriceConverter for uint256;
 
-    mapping(address => uint256) public addressToAmountFunded;
-    address[] public funders;
+    // convention for storage variables
+    // to be prefixed with s_ (e.g. s_variableName)
+    mapping(address => uint256) private s_addressToAmountFunded;
+    address[] private s_funders;
 
     address public immutable i_owner;
     uint256 public constant MINIMUM_USD = 5 * 10 ** 18;
@@ -26,27 +28,21 @@ contract FundMe {
 
     function fund() public payable {
         require(msg.value.getConversionRate(s_priceFeed) >= MINIMUM_USD, "You need to spend more ETH!");
-        // require(PriceConverter.getConversionRate(msg.value) >= MINIMUM_USD, "You need to spend more ETH!");
-        addressToAmountFunded[msg.sender] += msg.value;
-        funders.push(msg.sender);
-    }
-
-    function getVersion() public view returns (uint256){
-        return s_priceFeed.version();
+        s_addressToAmountFunded[msg.sender] += msg.value;
+        s_funders.push(msg.sender);
     }
 
     modifier onlyOwner {
-        // require(msg.sender == owner);
         if (msg.sender != i_owner) revert FundMe__NotOwner();
         _;
     }
 
     function withdraw() public onlyOwner {
-        for (uint256 funderIndex=0; funderIndex < funders.length; funderIndex++){
-            address funder = funders[funderIndex];
-            addressToAmountFunded[funder] = 0;
+        for (uint256 funderIndex = 0; funderIndex < s_funders.length; funderIndex++){
+            address funder = s_funders[funderIndex];
+            s_addressToAmountFunded[funder] = 0;
         }
-        funders = new address[](0);
+        s_funders = new address[](0);
         // // transfer
         // payable(msg.sender).transfer(address(this).balance);
 
@@ -58,24 +54,36 @@ contract FundMe {
         (bool callSuccess, ) = payable(msg.sender).call{value: address(this).balance}("");
         require(callSuccess, "Call failed");
     }
-    // Explainer from: https://solidity-by-example.org/fallback/
-    // Ether is sent to contract
-    //      is msg.data empty?
-    //          /   \
-    //         yes  no
-    //         /     \
-    //    receive()?  fallback()
-    //     /   \
-    //   yes   no
-    //  /        \
-    //receive()  fallback()
 
-    fallback() external payable {
-        fund();
+    /* Getters */
+
+    function getVersion() public view returns (uint256){
+        return s_priceFeed.version();
     }
 
-    receive() external payable {
-        fund();
+    function getAddressToAmountFunded(address fundingAddress) external view returns (uint256) {
+        return s_addressToAmountFunded[fundingAddress];
+    }
+
+    function getFunder(uint256 index) external view returns(address) {
+        require(index >= 0 && index < s_funders.length, "Index is out of bound!");
+        return s_funders[index];
+
+    }
+
+    function getFunderByAddress(address target) external view returns(address) {
+        require(target != address(0));
+
+        address funder = address(0);
+        for (uint256 idx = 0; idx < s_funders.length; idx++) {
+            if (s_funders[idx] == target) {
+                funder = s_funders[idx];
+                break;
+            }
+        }
+
+        require(funder != address(0), "Funder address is not found in the list of funders");
+        return funder;
     }
 
 }

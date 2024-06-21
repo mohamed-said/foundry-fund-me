@@ -9,19 +9,29 @@ contract HelperConfig is Script {
     // If we are on a local Anvil, we deploy mocks
     // Otherwise, grab the existing address from the live network
 
-    uint8 public constant DECIMALS = 8;
-    int256 public constant INITIAL_PRICE = 2000e8;
+    uint8 constant DECIMALS = 8;
+    int256 constant INITIAL_PRICE = 2000e8;
+    address constant MAINNET_PRICE_FEED_ADDRESS =
+        0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419;
+    address constant SEPOLIA_PRICE_FEED_ADDRESS =
+        0x694AA1769357215DE4FAC081bf1f309aDC325306;
+    uint256 constant MIANNET_CHAIN_ID = 1;
+    uint256 constant SEPOLIA_TEST_CHAIN_ID = 11155111;
 
     NetworkConfig public activeNetworkConfig;
 
     struct NetworkConfig {
+        // ETH/USD price feed address
+        // https://docs.chain.link/data-feeds/price-feeds/addresses/?network=ethereum&page=1
         address priceFeed;
     }
 
     constructor() {
-        if (block.chainid == 1) {
+        if (block.chainid == MIANNET_CHAIN_ID) {
+            // mainnet chain id
             activeNetworkConfig = getMainnetEthConfig();
-        } else if (block.chainid == 11155111) {
+            // sepolia test chain id: https://chainlist.org/chain/11155111
+        } else if (block.chainid == SEPOLIA_TEST_CHAIN_ID) {
             activeNetworkConfig = getSepoliaEthCongig();
         } else {
             activeNetworkConfig = getOrCreateAnvilEthConfig();
@@ -29,25 +39,24 @@ contract HelperConfig is Script {
     }
     function getMainnetEthConfig() public pure returns (NetworkConfig memory) {
         NetworkConfig memory mainnetConfig = NetworkConfig({
-            priceFeed: 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
+            priceFeed: MAINNET_PRICE_FEED_ADDRESS
         });
 
         return mainnetConfig;
     }
 
-    function getSepoliaEthCongig() public pure returns(NetworkConfig memory) {
+    function getSepoliaEthCongig() private pure returns(NetworkConfig memory) {
         // price feed addres
         NetworkConfig memory sepoliaConfig = NetworkConfig({
-            priceFeed: 0x694AA1769357215DE4FAC081bf1f309aDC325306
+            priceFeed: SEPOLIA_PRICE_FEED_ADDRESS
         });
 
         return sepoliaConfig;
     }
 
     function getOrCreateAnvilEthConfig() public returns (NetworkConfig memory) {
-        // price feed address
-        // 1. deploy the mocks
-        // 2. return te mock address
+        // this condition is there to aviod creating a new
+        // config each time we call the function
         if (activeNetworkConfig.priceFeed != address(0)) {
             return activeNetworkConfig;
         }
