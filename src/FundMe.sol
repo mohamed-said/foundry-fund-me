@@ -17,7 +17,7 @@ contract FundMe {
     mapping(address => uint256) private s_addressToAmountFunded;
     address[] private s_funders;
 
-    address public immutable i_owner;
+    address private immutable i_owner;
     uint256 public constant MINIMUM_USD = 5 * 10 ** 18;
     AggregatorV3Interface private s_priceFeed;
 
@@ -38,17 +38,15 @@ contract FundMe {
     }
 
     function withdraw() public onlyOwner {
-        for (uint256 funderIndex = 0; funderIndex < s_funders.length; funderIndex++){
+        // storing the length one time prevents the loop
+        // from calling the storage N times
+        // which saves much more gas per call to storage
+        uint256 nFunders = s_funders.length;
+        for (uint256 funderIndex = 0; funderIndex < nFunders; funderIndex++){
             address funder = s_funders[funderIndex];
             s_addressToAmountFunded[funder] = 0;
         }
         s_funders = new address[](0);
-        // // transfer
-        // payable(msg.sender).transfer(address(this).balance);
-
-        // // send
-        // bool sendSuccess = payable(msg.sender).send(address(this).balance);
-        // require(sendSuccess, "Send failed");
 
         // call
         (bool callSuccess, ) = payable(msg.sender).call{value: address(this).balance}("");
@@ -57,21 +55,25 @@ contract FundMe {
 
     /* Getters */
 
-    function getVersion() public view returns (uint256){
+    function getVersion() public view returns (uint256) {
         return s_priceFeed.version();
+    }
+
+    function getOwner() public view returns (address) {
+        return i_owner;
     }
 
     function getAddressToAmountFunded(address fundingAddress) external view returns (uint256) {
         return s_addressToAmountFunded[fundingAddress];
     }
 
-    function getFunder(uint256 index) external view returns(address) {
+    function getFunderByIndex(uint256 index) external view returns(address) {
         require(index >= 0 && index < s_funders.length, "Index is out of bound!");
         return s_funders[index];
 
     }
 
-    function getFunderByAddress(address target) external view returns(address) {
+    function isFunderInListOfFunders(address target) external view returns(bool) {
         require(target != address(0));
 
         address funder = address(0);
@@ -82,8 +84,7 @@ contract FundMe {
             }
         }
 
-        require(funder != address(0), "Funder address is not found in the list of funders");
-        return funder;
+        return funder != address(0);
     }
 
 }
