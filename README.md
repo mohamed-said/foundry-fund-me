@@ -18,9 +18,20 @@ $ forge build
 ```
 
 ### Test
+Run all the test cases.
 
 ```shell
 $ forge test
+```
+To run a specific test:
+
+```shell
+$ forge test --mt <test_case_name>
+```
+
+To add extra visibility and debug output, you can `-v` | `-vv` | `-vvv`
+```shell
+$ forge test --mt <test_case_name> -vvv
 ```
 
 ### Format
@@ -30,12 +41,15 @@ $ forge fmt
 ```
 
 ### Gas Snapshots
+This command creates a snapshot for the amount of gas used by your functions
+and test cases as well.
 
 ```shell
 $ forge snapshot
 ```
 
 ### Anvil
+Use this tool to fire up you local chain for testing and experimentation.
 
 ```shell
 $ anvil
