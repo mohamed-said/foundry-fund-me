@@ -44,6 +44,14 @@ $ anvil
 ### Deploy
 
 ```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+$ forge script script/DeployFundMe.s.sol:DeployFundMe --rpc-url $(SEPOLIA_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(ETHERSCAN_API_KEY) -vvv
 ```
 
+You can also use the included `Makefile` to do deploy. Make sure you include
+your RPC URLs and the neccessary keys in your `.env` file.
+
+Example:
+
+```shell
+$ make deploy-sepolia
+```
