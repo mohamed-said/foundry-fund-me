@@ -17,6 +17,13 @@ https://book.getfoundry.sh/
 $ forge build
 ```
 
+Some dependencies might be needed first. To install run the following in the
+project directory:
+```Shell
+$ forge install smartcontractkit/chainlink-brownie-contracts@0.8.0 --no-commit
+$ forge install Cyfrin/foundry-devops --no-commit
+```
+
 ### Test
 Run all the test cases.
 
