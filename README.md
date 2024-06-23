@@ -1,5 +1,7 @@
 ## Foundry Fund Me
 
+Allows people to send me money. And... yeah!
+
 A toy project to practice solidity and blockchain development using Foundry
 framework.
 
