@@ -25,17 +25,17 @@ contract FundMeTest is Test {
         vm.deal(fakeUserAddress, STARTING_BALANCE);
     }
 
-    function test_MinimumDollarIsFive() public {
+    function test_MinimumDollarIsFive() public view {
        assertEq(fundMe.MINIMUM_USD(), 5e18);
     }
 
-    function test_OwnerIsMessgeSender() public {
+    function test_OwnerIsMessgeSender() public view {
         console.log(msg.sender);
         console.log("address(this): %s", address(this));
         assertEq(fundMe.getOwner(), msg.sender);
     }
 
-    function test_PriceFeedVersionIsAccurate() public {
+    function test_PriceFeedVersionIsAccurate() public view {
         console.log("Chain ID: %s", block.chainid);
         uint256 version = fundMe.getVersion();
         assertEq(version, 4);

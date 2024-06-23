@@ -8,7 +8,7 @@ import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {DeployFundMe} from "../../script/DeployFundMe.s.sol";
 import {FundInteractions, WithdrawInteractions} from "../../script/Interactions.s.sol";
 
-contract FundMeTestIntegration is Test {
+contract TestFundIntegration is Test {
     FundMe fundMe;
     address private immutable fakeUserAddress = makeAddr("fakeUser");
     uint256 private constant STARTING_BALANCE = 10 ether;
